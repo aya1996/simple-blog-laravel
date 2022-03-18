@@ -70,7 +70,8 @@ class postsController extends Controller
      */
     public function show($id)
     {
-        //
+        return view('blog.show')
+        ->with('post', Post::where('id', $id)->first());
     }
 
     /**
@@ -81,7 +82,9 @@ class postsController extends Controller
      */
     public function edit($id)
     {
-        //
+        return view('blog.edit')
+        ->with('post', Post::where('id', $id)->first())
+        ->with('tags',Tag::orderBy('updated_at','DESC')->get());
     }
 
     /**
@@ -93,7 +96,21 @@ class postsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $request->validate([
+            'title' => 'required',
+            'description' => 'required',
+        ]);
+
+        Post::where('id', $id)
+            ->update([
+                'title' => $request->input('title'),
+                'description' => $request->input('description'),
+                'user_id' => auth()->user()->id,
+                'tag_id' => $request->input('tag')
+            ]);
+
+        return redirect('/blog')
+            ->with('message', 'Your post has been updated!');
     }
 
     /**
