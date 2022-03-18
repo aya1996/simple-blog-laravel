@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Post;
+use App\Models\Tag;
 
 class postsController extends Controller
 {
@@ -13,7 +15,9 @@ class postsController extends Controller
      */
     public function index()
     {
-        //
+        
+        return view('blog.index')
+        ->with('posts',Post::orderBy('updated_at','DESC')->get(),'tags',Tag::orderBy('updated_at','DESC')->get());
     }
 
     /**
@@ -23,7 +27,8 @@ class postsController extends Controller
      */
     public function create()
     {
-        //
+        return view('blog.create')
+        ->with('tags',Tag::orderBy('updated_at','DESC')->get());
     }
 
     /**
@@ -34,7 +39,27 @@ class postsController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'title' => 'required',
+            'description' => 'required',
+            'tag' => 'required',
+            'image' => 'required|mimes:jpg,png,jpeg|max:5048'
+        ]);
+
+        $newImageName = uniqid() . '-' . $request->title . '.' . $request->image->extension();
+
+        $request->image->move(public_path('images'), $newImageName);
+
+        Post::create([
+            'title' => $request->input('title'),
+            'description' => $request->input('description'),
+            'image_path' => $newImageName,
+            'user_id' => auth()->user()->id,
+            'tag_id' => $request->input('tag')
+        ]);
+
+        return redirect('/blog')
+            ->with('message', 'Your post has been added!');
     }
 
     /**

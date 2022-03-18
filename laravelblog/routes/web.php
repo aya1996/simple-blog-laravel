@@ -21,5 +21,5 @@ Route::get('/',[pagesController::class,'index']);
 Route::resource('/blog',postsController::class);
 Auth::routes();
 
-Route::get('/home', [\App\Http\Controllers\HomeController::class, 'index'])->name('home');
+Route::get('/home', [\App\Http\Controllers\pagesController::class, 'index'])->name('home');
 
