@@ -82,9 +82,12 @@ class postsController extends Controller
      */
     public function edit($id)
     {
-        return view('blog.edit')
-        ->with('post', Post::where('id', $id)->first())
-        ->with('tags',Tag::orderBy('updated_at','DESC')->get());
+        $tags = Tag::all();
+        $post = Post::where('id', $id)->first();
+        $selectedTags = $post->tags->pluck('id')->all();
+        return view('blog.edit', compact('post', 'tags', 'selectedTags'));
+   
+        
     }
 
     /**
@@ -98,13 +101,20 @@ class postsController extends Controller
     {
         $request->validate([
             'title' => 'required',
-            'description' => 'required',
+            'description' => 'required'
+          
         ]);
+       
+        $newImageName = uniqid() . '-' . $request->title . '.' . $request->image->extension();
+
+        $request->image->move(public_path('images'), $newImageName);
 
         Post::where('id', $id)
             ->update([
+               
                 'title' => $request->input('title'),
                 'description' => $request->input('description'),
+                'image_path' =>  $newImageName,
                 'user_id' => auth()->user()->id,
                 'tag_id' => $request->input('tag')
             ]);
