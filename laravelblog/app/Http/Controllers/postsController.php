@@ -8,6 +8,10 @@ use App\Models\Tag;
 
 class postsController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth', ['except' => ['index', 'show']]);
+    }
     /**
      * Display a listing of the resource.
      *
@@ -28,7 +32,7 @@ class postsController extends Controller
     public function create()
     {
         return view('blog.create')
-        ->with('tags',Tag::orderBy('updated_at','DESC')->get());
+        ->with('tags',Tag::orderBy('id','DESC')->get());
     }
 
     /**
@@ -120,7 +124,7 @@ class postsController extends Controller
             ]);
 
         return redirect('/blog')
-            ->with('message', 'Your post has been updated!');
+            ->with('message', '  Your post has been updated!');
     }
 
     /**
@@ -131,6 +135,10 @@ class postsController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $post = Post::where('id', $id);
+        $post->delete();
+
+        return redirect('/blog')
+            ->with('message', '   Your post has been deleted!');
     }
 }
